@@ -1,4 +1,4 @@
-from redef import reserved_words, reserved_symbols, let, symbols
+from redef import reserved_words, reserved_symbols, let, symbols, diglet, delimi, delims, delimb, dig, delimtf
 
 
 def test(tmp_tokens, char, token_pos, str_pos, token):
@@ -40,6 +40,7 @@ def tokenize(program, str_pos, tmp_tokens, avoid):
     """
     # Char position for token
     token_pos = 0
+    result = []
 
     # Check if one of the reserved words
     while program[str_pos] != " " and program[str_pos] != "\n":
@@ -85,7 +86,6 @@ def tokenize(program, str_pos, tmp_tokens, avoid):
         if len(tmp_tokens) == 0
         else (list(tmp_tokens.keys())[0], list(tmp_tokens.values())[0])
     )
-
     str_pos += 1
     return result, str_pos
 
@@ -109,11 +109,126 @@ def lexical_analysis(program):
 
     str_pos = 0
 
-    print(program)
-
     while True:
         if program[str_pos] == " ":
+            results.append(("space", "reserve symbol"))
             str_pos += 1
+
+
+        # Tint and flora
+        if program[str_pos] == "0":
+            num = ""
+            num += program[str_pos]
+            str_pos += 1
+            if program[str_pos] == ".":
+                num += program[str_pos]
+                str_pos += 1
+
+                if program[str_pos] in dig:
+                    num += program[str_pos]
+                    str_pos += 1
+                    while program[str_pos] not in delimtf or len(num) < 12:
+                        num += program[str_pos]
+
+                        if program[str_pos + 1] in delimtf:
+                            results.append((num, "flora lit"))
+                            break
+                        str_pos += 1
+                    str_pos += 1
+            else:
+                results.append(("0", "tint"))
+                str_pos += 1
+        elif program[str_pos] in dig:
+            num = ""
+            num += program[str_pos]
+            str_pos += 1
+            while program[str_pos] not in delimtf or len(num) < 6:
+                num += program[str_pos]
+
+                if program[str_pos + 1] in ".":
+                    break;
+
+                if program[str_pos + 1] in delimtf:
+                    results.append((num, "tint lit"))
+                    break
+                str_pos += 1
+            str_pos += 1
+
+            if program[str_pos] == ".":
+                num += program[str_pos]
+                str_pos += 1
+
+                if program[str_pos] in dig:
+                    num += program[str_pos]
+                    str_pos += 1
+                    while program[str_pos] not in delimtf or len(num) < 12:
+                        num += program[str_pos]
+
+                        if program[str_pos + 1] in delimtf:
+                            results.append((num, "flora lit"))
+                            break
+                        str_pos += 1
+                    str_pos += 1
+
+        elif program[str_pos] == "-":
+            num = ""
+            num += program[str_pos]
+            str_pos += 1
+
+            if program[str_pos] in dig:
+                num += program[str_pos]
+                str_pos += 1
+                while program[str_pos] not in delimtf or len(num) < 6:
+                    num += program[str_pos]
+
+                    if program[str_pos + 1] in ".":
+                        break;
+
+                    if program[str_pos + 1] in delimtf:
+                        results.append((num, "tint"))
+                        break
+                    str_pos += 1
+                str_pos += 1
+
+                if program[str_pos] == ".":
+                    num += program[str_pos]
+                    str_pos += 1
+
+                    if program[str_pos] in dig:
+                        num += program[str_pos]
+                        str_pos += 1
+                        while program[str_pos] not in delimtf or len(num) < 12:
+                            num += program[str_pos]
+
+                            if program[str_pos + 1] in delimtf:
+                                results.append((num, "flora lit"))
+                                break
+                            str_pos += 1
+                        str_pos += 1
+
+        # Bloom
+        if program[str_pos] == "t":
+            str_pos += 1
+            if program[str_pos] == "r":
+                str_pos += 1
+                if program[str_pos] == "u":
+                    str_pos += 1
+                    if program[str_pos] == "e" and program[str_pos + 1] in delimb:
+                        results.append(("true", "bloom"))
+                        str_pos += 1
+
+        # Bloom
+        if program[str_pos] == "f":
+            if program[str_pos + 1] == "a":
+                str_pos += 1
+                if program[str_pos + 2] == "l":
+                    str_pos += 1
+                    if program[str_pos] == "s":
+                        str_pos += 1
+                        if program[str_pos] == "e" and program[str_pos + 1] in delimb:
+                            results.append(("false", "bloom"))
+                            str_pos += 1
+
 
         # Reserved Symbols
         if program[str_pos] in symbols:
@@ -127,11 +242,80 @@ def lexical_analysis(program):
             results.append(result)
             tmp_tokens_rw.update(reserved_words)
 
-        print(str_pos)
-        if str_pos == len(program):
+        # Identifier
+        elif program[str_pos] == "#":
+            identifier = ""
+
+            results.append(("#", "reserve symbol"))
+            str_pos += 1
+
+            identifier += program[str_pos]
+            str_pos += 1
+            if program[str_pos] in let or program[str_pos + 1] in delimi:
+
+                if program[str_pos] not in delimi:
+                    identifier += program[str_pos]
+                    str_pos += 1
+                if program[str_pos] in diglet or program[str_pos + 1] in delimi:
+                    if program[str_pos] not in delimi:
+                        identifier += program[str_pos]
+                        str_pos += 1
+                    if program[str_pos] in diglet or program[str_pos + 1] in delimi:
+                        if program[str_pos] not in delimi:
+                            identifier += program[str_pos]
+                            str_pos += 1
+                        if program[str_pos] in diglet or program[str_pos + 1] in delimi:
+                            if program[str_pos] not in delimi:
+                                identifier += program[str_pos]
+                                str_pos += 1
+                            if program[str_pos] in diglet or program[str_pos + 1] in delimi:
+                                if program[str_pos] not in delimi:
+                                    identifier += program[str_pos]
+                                    str_pos += 1
+                                if program[str_pos] in diglet or program[str_pos + 1] in delimi:
+                                    if program[str_pos] not in delimi:
+                                        identifier += program[str_pos]
+                                        str_pos += 1
+                                    if program[str_pos] in diglet and program[str_pos + 1] in delimi:
+                                        if program[str_pos] not in delimi:
+                                            identifier += program[str_pos]
+                                            str_pos += 1
+                                        print("test")
+            results.append((identifier, "identifier"))
+
+
+        # String
+        elif program[str_pos] == "\"":
+            string = ""
+            count = 0
+
+            results.append(("\"", "reserve symbol"))
+            str_pos += 1
+
+            string += program[str_pos]
+            str_pos += 1
+
+            tmp = ""
+
+            while program[str_pos] not in delims:
+                string += program[str_pos]
+
+                if program[str_pos + 1] in delims:
+                    tmp = "\""
+                    break
+                str_pos += 1
+
+            results.append((string, "string"))
+            results.append((tmp, "reserve symbol"))
+
+        
+        if str_pos >= len(program):
             break
 
     return results
+
+            
+        
 
 
 def ignore_comment(program):
