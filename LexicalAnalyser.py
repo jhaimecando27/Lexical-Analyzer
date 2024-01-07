@@ -1,4 +1,8 @@
-from redef import reserved_words, reserved_symbols, let, symbols, diglet, delimi, delims, delimb, dig, delimtf
+from redef import (
+    reserved_words, reserved_symbols,
+    let, symbols, diglet,
+    delimi, delims, delimb, dig, delimtf
+)
 
 
 def test(tmp_tokens, char, token_pos, str_pos, token):
@@ -17,27 +21,7 @@ def test(tmp_tokens, char, token_pos, str_pos, token):
     )
 
 
-def tokenize(program, str_pos, tmp_tokens, avoid):
-    """Yung nangyayari dito, i-chcheck nya letter by letter yung input string
-    tas icocompare nya yung letter sa same character position sa lahat ng words
-    (e.g. reserved words) tas kapag hinde parehas tatanggalin nya yung word na
-    yun sa isang list (tmp_tokens), gagawin nya yun hanggang isa or wala natira
-
-    STATUS: reserved words and symbols palang
-
-    TODO:
-        - Respect delimeter
-
-    Params:
-        program     - (STR) 1 line of code
-        str_pos     - (INT) current charactor position in the program
-        tmp_tokens  - (DICT) list of tokens (Reserved Words/Symbols)
-        avoid       - (SET) list of char that should not be in word
-
-
-    Returns:
-        result - Two dimentional array (lexem, token)
-    """
+def token_rw(program, str_pos, tmp_tokens, avoid):
     # Char position for token
     token_pos = 0
     result = []
@@ -114,7 +98,6 @@ def lexical_analysis(program):
             results.append(("space", "reserve symbol"))
             str_pos += 1
 
-
         # Tint and flora
         if program[str_pos] == "0":
             num = ""
@@ -146,7 +129,7 @@ def lexical_analysis(program):
                 num += program[str_pos]
 
                 if program[str_pos + 1] in ".":
-                    break;
+                    break
 
                 if program[str_pos + 1] in delimtf:
                     results.append((num, "tint lit"))
@@ -182,7 +165,7 @@ def lexical_analysis(program):
                     num += program[str_pos]
 
                     if program[str_pos + 1] in ".":
-                        break;
+                        break
 
                     if program[str_pos + 1] in delimtf:
                         results.append((num, "tint"))
@@ -229,16 +212,17 @@ def lexical_analysis(program):
                             results.append(("false", "bloom"))
                             str_pos += 1
 
-
         # Reserved Symbols
         if program[str_pos] in symbols:
-            result, str_pos = tokenize(program, str_pos, tmp_tokens_rs, avoid=let)
+            result, str_pos = token_rw(
+                program, str_pos, tmp_tokens_rs, avoid=let)
             results.append(result)
             tmp_tokens_rs.update(reserved_symbols)
 
         # Reserved Words
         elif program[str_pos] in let:
-            result, str_pos = tokenize(program, str_pos, tmp_tokens_rw, avoid=symbols)
+            result, str_pos = token_rw(
+                program, str_pos, tmp_tokens_rw, avoid=symbols)
             results.append(result)
             tmp_tokens_rw.update(reserved_words)
 
@@ -283,7 +267,6 @@ def lexical_analysis(program):
                                         print("test")
             results.append((identifier, "identifier"))
 
-
         # String
         elif program[str_pos] == "\"":
             string = ""
@@ -308,14 +291,10 @@ def lexical_analysis(program):
             results.append((string, "string"))
             results.append((tmp, "reserve symbol"))
 
-        
         if str_pos >= len(program):
             break
 
     return results
-
-            
-        
 
 
 def ignore_comment(program):
@@ -330,7 +309,7 @@ def remove_pattern(text, start_pattern, end_pattern):
         end_index = text.find(end_pattern, start_index + len(start_pattern))
 
         if start_index != -1 and end_index != -1:
-            text = text[:start_index] + text[end_index + len(end_pattern) :]
+            text = text[:start_index] + text[end_index + len(end_pattern):]
         else:
             break
 

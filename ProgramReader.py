@@ -103,7 +103,7 @@ class AnalyzerGui:
             # TEST
             start = time.time()
             print(line)
-            self.tokens = lexical_analysis(line)
+            self.tokens = lexical_analysis(line + "\n")
             # TEST
             end = time.time()
             print(str(end - start) + "s")
